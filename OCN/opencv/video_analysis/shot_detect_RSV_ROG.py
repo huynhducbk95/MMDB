@@ -6,13 +6,22 @@ from  __future__ import  division
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
-from shutil import copyfile
+
 
 #def function to calculating the constrast of gray image
 def calConstrastGray(img_gray):
     var = np.var(img_gray)
     mean = np.mean(img_gray)
     height, width = img_gray.shape
+    size = height * width
+    constrast = np.sqrt(1 / size * np.sum((img_gray - mean) * (img_gray - mean)))
+    #print("constrast ", constrast)
+    return  constrast
+#def function to calculating the constrast of gray image
+def calConstrastColor(img_gray):
+    var = np.var(img_gray)
+    mean = np.mean(img_gray)
+    height, width, chanel = img_gray.shape
     size = height * width
     constrast = np.sqrt(1 / size * np.sum((img_gray - mean) * (img_gray - mean)))
     #print("constrast ", constrast)
@@ -92,7 +101,7 @@ def dectUsingRSV(inputfile, outputfolder):
         res = np.append(res, diffChiSquare, axis=0)
     var = np.var(res)
     mean = np.mean(res)
-    T = mean + 0.5 * np.sqrt(var)
+    T = mean + 0.4 * np.sqrt(var)
     print("mean ", mean)
     print("var ", np.sqrt(var))
     plt.plot(res, color='r')
@@ -178,7 +187,7 @@ def dectUsingROG(inputfolder):
     arrDiff = np.array([], np.int)
     for i in range(lengthShot):
         if (i == 0):
-            filename1 = inputfolder+"/frame" + str(int(arrShot[0])) + ".jpg"
+            filename1 = inputfolder+"/frame/frame" + str(int(arrShot[0])) + ".jpg"
             #
             # print filename1
             img_before = cv2.imread(filename1)
@@ -186,7 +195,7 @@ def dectUsingROG(inputfolder):
             index_before = arrShot[0]
 
         else:
-            filename2 = inputfolder+"/frame" + str(int(arrShot[i])) + ".jpg"
+            filename2 = inputfolder+"/frame/frame" + str(int(arrShot[i])) + ".jpg"
             img_current = cv2.imread(filename2)
             hist_current = hog.compute(img_current)
             index_current = arrShot[i]
@@ -210,14 +219,14 @@ def dectUsingROG(inputfolder):
     for i in range(lengthShot):
         uri = shot_folder + "/shot%d.avi" % i
         if (i == 0):
-            filename1 = inputfolder+"/frame" + str(int(arrShot[0])) + ".jpg"
+            filename1 = inputfolder+"/frame/frame" + str(int(arrShot[0])) + ".jpg"
             #
             # print filename1
             img_before = cv2.imread(filename1)
             index_before = arrShot[0]
             arr_concat.append(uri)
         else:
-            filename2 = inputfolder+"/frame" + str(int(arrShot[i])) + ".jpg"
+            filename2 = inputfolder+"/frame/frame" + str(int(arrShot[i])) + ".jpg"
             img_current = cv2.imread(filename2)
             index_current = arrShot[i]
             diff = arrDiff[i - 1]
@@ -225,8 +234,8 @@ def dectUsingROG(inputfolder):
             if diff < mean:
                 arr_concat.append(uri)
                 # print img_before.shape
-                constrast_before = calConstrastGray(img_before)
-                constrast_current = calConstrastGray(img_current)
+                constrast_before = calConstrastColor(img_before)
+                constrast_current = calConstrastColor(img_current)
 
                 if (constrast_before < constrast_current):
                     img_before = img_current
@@ -258,4 +267,5 @@ def detect_using_RSV_ROG(video_uri, output_folder):
     dectUsingROG(output_folder)
 
 if __name__ == '__main__':
-    detect_using_RSV_ROG()
+    detect_using_RSV_ROG("../../../data/video/doc_long_bolero.mp4",
+                         "../../../data/video/output/doc_long_bolero")
