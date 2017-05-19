@@ -8,6 +8,21 @@ import cv2
 from matplotlib import pyplot as plt
 import os
 
+#def function load array diffirences of all frame in video and show
+def load_and_show_histogram(inputfolder, type):
+    if type == "rsv":
+        rsvfile = inputfolder + "/rsv.txt"
+        arr_diff = np.loadtxt(rsvfile, dtype=np.float, delimiter="\n")
+        plt.plot(arr_diff, color='r')
+        plt.ylabel('distance')
+        plt.show()
+    else:
+        hog_file = inputfolder + "/hog.txt"
+        arr_diff = np.loadtxt(hog_file, dtype=np.float, delimiter="\n")
+        plt.plot(arr_diff, color='r')
+        plt.ylabel('distance')
+        plt.show()
+    cv2.destroyAllWindows()
 #def function to calculating the constrast of gray image
 def calConstrastGray(img_gray):
     var = np.var(img_gray)
@@ -17,7 +32,8 @@ def calConstrastGray(img_gray):
     constrast = np.sqrt(1 / size * np.sum((img_gray - mean) * (img_gray - mean)))
     #print("constrast ", constrast)
     return  constrast
-#def function to calculating the constrast of gray image
+
+#def function to calculating the constrast of color image
 def calConstrastColor(img_gray):
     var = np.var(img_gray)
     mean = np.mean(img_gray)
@@ -26,8 +42,10 @@ def calConstrastColor(img_gray):
     constrast = np.sqrt(1 / size * np.sum((img_gray - mean) * (img_gray - mean)))
     #print("constrast ", constrast)
     return  constrast
-#concat two frame
+
+#concat many frame to one
 def concat_shot(arr_uri_shot, uri_out):
+    #read
     cap0 = cv2.VideoCapture(arr_uri_shot[0])
     fps = int(cap0.get(cv2.CAP_PROP_FPS))
     width = int(cap0.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -64,11 +82,15 @@ def dectUsingRSV(inputfile, outputfolder):
     :param outputfolder: output folder
     :return: 
     """
+    #load image
     cap = cv2.VideoCapture(inputfile)
+
+    #create first output folder if not exist
     output_keyframe_path = outputfolder +"/frame/"
     output_shot_path = outputfolder + "/shot/"
     if not os.path.exists(output_keyframe_path): os.makedirs(output_keyframe_path)
     if not os.path.exists(output_shot_path): os.makedirs(output_shot_path)
+
     # get number frame/second, height-weight of video
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -77,10 +99,9 @@ def dectUsingRSV(inputfile, outputfolder):
     # Define the codec and create VideoWriter object
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
 
-    old_frame = []
     new_frame = []
     res = np.array([], dtype=np.float)
-
+    #loop through all frame, calculating chi-square diffirence and storing to res array
     for i in range(length):
         # Capture frame-by-frame
         ret, frame = cap.read()
@@ -101,9 +122,11 @@ def dectUsingRSV(inputfile, outputfolder):
         # diffrent between two frame using chi-square formular
         diffChiSquare = [cv2.compareHist(new_frame, old_frame, 1)]
         res = np.append(res, diffChiSquare, axis=0)
+
+    #calculating mean and variance to creating the thresold
     var = np.var(res)
     mean = np.mean(res)
-    T = mean + 0.4 * np.sqrt(var)
+    T = mean + 0.1 * np.sqrt(var)
     print("mean ", mean)
     print("var ", np.sqrt(var))
     plt.plot(res, color='r')
@@ -112,22 +135,16 @@ def dectUsingRSV(inputfile, outputfolder):
     shotDect = [index for index in range(length) if res[index] >= T]
     index = 0
     lengthShot = len(shotDect)
-    selectedFrame = np.array([], dtype=np.int8)
-    for i in range(lengthShot):
-        select = 0
-        if i == 0:
-            select = shotDect[i] / 2
-        else:
-            select = (shotDect[i - 1] + shotDect[i]) / 2
-        selectedFrame = np.append(selectedFrame, select)
-    lengthSelected = len(selectedFrame)
+    #set position frame to reread and get the keyframe in video
     cap.set(2, 0)
+
     maxConstrast = 0
     imgchoice = []
     indexChoice = 0
     arrChoice = np.array([], dtype=np.int)
     shot0path = output_shot_path+"shot0.avi"
     out = cv2.VideoWriter(shot0path, fourcc, fps, (width, height))
+    #loop through again video then get key frame and shot
     for i in range(length):
         # Capture frame-by-frame
         ret, frame = cap.read()
@@ -135,11 +152,11 @@ def dectUsingRSV(inputfile, outputfolder):
         # calculate the constrast
         if (ret != True):
             break
-        # if (index< lengthSelected) & (i == selectedFrame[index]):
-        #    print (i)
-        #    cv2.imshow('frame', frame)
-        #    cv2.imwrite("../data/video/output/The_Good_Dinosaur3/frame%d.jpg" % shotDect[index], frame)
-        #    index = index + 1
+
+        #if this position frame is less than shotDect's position
+        #then current position and before is in a same shot
+        #add this to current shot
+        #and calculating the contrast to choice be max contrast image to be keyframe
         if (index < lengthShot) & (i < shotDect[index]):
             out.write(frame)
             constrast = calConstrastGray(gray)
@@ -149,6 +166,8 @@ def dectUsingRSV(inputfile, outputfolder):
                 maxConstrast = constrast
                 imgchoice = gray
                 indexChoice = i
+        #if this position frame is shotDect's position
+        #then store the keyframe, close this current shot to open and write new shot
         else:
             if i == 0:
                 imgchoice = gray
@@ -166,9 +185,10 @@ def dectUsingRSV(inputfile, outputfolder):
             index = index + 1
             if (index >= lengthShot):
                 break
-    # When everything done, release the capture
+    # When everything done, release the capture and save metadata to file
     np.savetxt(outputfolder+"/choice.txt", arrChoice)
     np.savetxt(outputfolder+"/shotdect.txt", shotDect)
+    np.savetxt(outputfolder + "/hsv.txt", res)
     cap.release()
     out.release()
     cv2.destroyAllWindows()
@@ -187,11 +207,11 @@ def dectUsingROG(inputfolder):
     index_before = 0
     hog = cv2.HOGDescriptor()
     arrDiff = np.array([], np.int)
+
+    #loop through each keyshot to calculate the diffirence using ROG histogram
     for i in range(lengthShot):
         if (i == 0):
             filename1 = inputfolder+"/frame/frame" + str(int(arrShot[0])) + ".jpg"
-            #
-            # print filename1
             img_before = cv2.imread(filename1)
             hist_before = hog.compute(img_before)
             index_before = arrShot[0]
@@ -209,18 +229,24 @@ def dectUsingROG(inputfolder):
             img_before = img_current
             hist_before = hist_current
             index_before = index_current
-
+    np.savetxt(inputfolder + "/hsv.txt", arrDiff)
+    #calculating the mean and variance to create thresold
     mean = np.mean(arrDiff)
     var = np.sqrt(np.var(arrDiff))
     print("mean ", mean)
     print("var ", var)
+    #this variable to store list keyframe need to be concate because
+    #these differences is less than the thresold
     arr_concat = []
+
+    #folder to store results
     shot_folder = inputfolder +"/shot"
     concat_shot_folder = inputfolder + "/rog/shot"
     rog_folder = inputfolder + "/rog"
     if not os.path.exists(rog_folder): os.makedirs(rog_folder)
     if not os.path.exists(concat_shot_folder): os.makedirs(concat_shot_folder)
     concat = 0
+    #now loop through again, find and store best keyframe and shot
     for i in range(lengthShot):
         uri = shot_folder + "/shot%d.avi" % i
         if (i == 0):
@@ -245,12 +271,8 @@ def dectUsingROG(inputfolder):
                 if (constrast_before < constrast_current):
                     img_before = img_current
                     index_before = index_current
-
-            # else if diff >=5, store both image, then continue
             else:
-
                 # save both image
-                # print "save both file"
                 keypath1 = inputfolder + "/rog/frame%d.jpg" % index_before
                 keypath2 = inputfolder + "/rog/frame%d.jpg" % index_before
                 cv2.imwrite \
@@ -272,5 +294,5 @@ def detect_using_RSV_ROG(video_uri, output_folder):
     dectUsingROG(output_folder)
 
 if __name__ == '__main__':
-    detect_using_RSV_ROG("../../../data/video/nhoc_trum.mp4",
-                         "../../../data/video/output/nhoc_trum")
+    detect_using_RSV_ROG("../../../data/video/daddy_and_baby.mp4",
+                         "../../../data/video/output/daddy_and_baby")
