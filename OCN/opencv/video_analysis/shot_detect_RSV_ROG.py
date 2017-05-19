@@ -310,7 +310,7 @@ def detect_using_HSV_ROG(video_uri, output_folder):
 
 if __name__ == '__main__':
 
-    detect_using_HSV_ROG("../../../data/video/english.mp4",
-                         "../../../data/video/output/english")
-    # load_and_show_histogram("../../../data/video/output/english", "hsv")
+    detect_using_HSV_ROG("../../../data/video/daddy_and_baby.mp4",
+                         "../../../data/video/output/daddy_and_baby")
+    load_and_show_histogram("../../../data/video/output/daddy_and_baby", "hsv")
 
