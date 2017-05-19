@@ -6,7 +6,7 @@ from  __future__ import  division
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
-
+import os
 
 #def function to calculating the constrast of gray image
 def calConstrastGray(img_gray):
@@ -67,6 +67,8 @@ def dectUsingRSV(inputfile, outputfolder):
     cap = cv2.VideoCapture(inputfile)
     output_keyframe_path = outputfolder +"/frame/"
     output_shot_path = outputfolder + "/shot/"
+    if not os.path.exists(output_keyframe_path): os.makedirs(output_keyframe_path)
+    if not os.path.exists(output_shot_path): os.makedirs(output_shot_path)
     # get number frame/second, height-weight of video
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -215,6 +217,9 @@ def dectUsingROG(inputfolder):
     arr_concat = []
     shot_folder = inputfolder +"/shot"
     concat_shot_folder = inputfolder + "/rog/shot"
+    rog_folder = inputfolder + "/rog"
+    if not os.path.exists(rog_folder): os.makedirs(rog_folder)
+    if not os.path.exists(concat_shot_folder): os.makedirs(concat_shot_folder)
     concat = 0
     for i in range(lengthShot):
         uri = shot_folder + "/shot%d.avi" % i
@@ -267,5 +272,5 @@ def detect_using_RSV_ROG(video_uri, output_folder):
     dectUsingROG(output_folder)
 
 if __name__ == '__main__':
-    detect_using_RSV_ROG("../../../data/video/doc_long_bolero.mp4",
-                         "../../../data/video/output/doc_long_bolero")
+    detect_using_RSV_ROG("../../../data/video/nhoc_trum.mp4",
+                         "../../../data/video/output/nhoc_trum")
