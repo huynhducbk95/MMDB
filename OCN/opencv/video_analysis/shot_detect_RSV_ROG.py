@@ -10,14 +10,14 @@ import os
 
 #def function load array diffirences of all frame in video and show
 def load_and_show_histogram(inputfolder, type):
-    if type == "rsv":
-        rsvfile = inputfolder + "/rsv.txt"
+    if type == "hsv":
+        rsvfile = inputfolder + "/hsv.txt"
         arr_diff = np.loadtxt(rsvfile, dtype=np.float, delimiter="\n")
         plt.plot(arr_diff, color='r')
         plt.ylabel('distance')
         plt.show()
     else:
-        hog_file = inputfolder + "/hog.txt"
+        hog_file = inputfolder + "/rog.txt"
         arr_diff = np.loadtxt(hog_file, dtype=np.float, delimiter="\n")
         plt.plot(arr_diff, color='r')
         plt.ylabel('distance')
@@ -229,7 +229,7 @@ def dectUsingROG(inputfolder):
             img_before = img_current
             hist_before = hist_current
             index_before = index_current
-    np.savetxt(inputfolder + "/hsv.txt", arrDiff)
+    np.savetxt(inputfolder + "/rog.txt", arrDiff)
     #calculating the mean and variance to create thresold
     mean = np.mean(arrDiff)
     var = np.sqrt(np.var(arrDiff))
@@ -294,5 +294,6 @@ def detect_using_RSV_ROG(video_uri, output_folder):
     dectUsingROG(output_folder)
 
 if __name__ == '__main__':
-    detect_using_RSV_ROG("../../../data/video/daddy_and_baby.mp4",
-                         "../../../data/video/output/daddy_and_baby")
+    #detect_using_RSV_ROG("../../../data/video/daddy_and_baby.mp4",
+    #                     "../../../data/video/output/daddy_and_baby")
+    load_and_show_histogram("../../../data/video/output/daddy_and_baby", "hsv")
