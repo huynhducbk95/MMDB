@@ -74,3 +74,10 @@
   from{ bottom:-100px; opacity:0 }
   to{ bottom:0; opacity:1 }
 }
+
+.modal.modal-wide .modal-dialog {
+  width: 90%;
+}
+.modal-wide .modal-body {
+  overflow-y: auto;
+}

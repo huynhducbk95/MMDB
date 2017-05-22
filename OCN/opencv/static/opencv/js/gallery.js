@@ -1,74 +1,19 @@
 /**
  * Created by huynhduc on 17/05/2017.
  */
-
-$(document).ready(function () {
-
-    loadGallery(true, 'a.thumbnail');
-
-    //This function disables buttons when needed
-    function disableButtons(counter_max, counter_current) {
-        $('#show-previous-image, #show-next-image').show();
-        if (counter_max == counter_current) {
-            $('#show-next-image').hide();
-        } else if (counter_current == 1) {
-            $('#show-previous-image').hide();
-        }
-    }
-
-    /**
-     *
-     * @param setIDs        Sets IDs when DOM is loaded. If using a PHP counter, set to false.
-     * @param setClickAttr  Sets the attribute for the click handler.
-     */
-
-    function loadGallery(setIDs, setClickAttr) {
-        var current_image,
-            selector,
-            counter = 0;
-
-        $('#show-next-image, #show-previous-image').click(function () {
-            if ($(this).attr('id') == 'show-previous-image') {
-                current_image--;
-            } else {
-                current_image++;
-            }
-
-            selector = $('[data-image-id="' + current_image + '"]');
-            updateGallery(selector);
-        });
-
-        function updateGallery(selector) {
-            var $sel = selector;
-            current_image = $sel.data('image-id');
-            $('#image-gallery-caption').text($sel.data('caption'));
-            $('#image-gallery-title').text($sel.data('title'));
-            $('#image-gallery-image').attr('src', $sel.data('image'));
-            disableButtons(counter, $sel.data('image-id'));
-        }
-
-        if (setIDs == true) {
-            $('[data-image-id]').each(function () {
-                counter++;
-                $(this).attr('data-image-id', counter);
-            });
-        }
-        $(setClickAttr).on('click', function () {
-            updateGallery($(this));
-        });
-    }
-});
-$(document).ready(function () {
+$(document).ready(function() {
     $('.carousel').carousel({
-        interval: 6000
+      interval: 6000
     })
-});
+  });
 
 $('#btn_upload_video').change(function (event) {
     var filename = $('input[type=file]').val().split('\\').pop();
     if (filename == '') {
-        $('#btn_watch_video').css('display', 'none');
-        $('#video_name').text('');
+        // $('#btn_watch_video').css('display', 'none');
+        // $('#video_name').text('');
+        // $('#btn_analysis').css('display','none');
+        // $('#ctn_slide').css('display','none');
     } else {
         $('#video_name').text(filename);
         var URL = window.URL || window.webkitURL;
@@ -84,7 +29,9 @@ $("form#form_upload_file").submit(function () {
     var url = 'http://localhost:8000' + $('#myCarousel').data('url');
     var token = $('input[name="csrfmiddlewaretoken"]').val();
     var formData = new FormData($(this)[0]);
+    $('#gallery_frame').empty();
     $('#loader').css('display', 'block');
+    $('#ctn_slide').css('display','none');
     $.ajaxSetup({
         beforeSend: function (xhr, settings) {
             if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -100,6 +47,7 @@ $("form#form_upload_file").submit(function () {
         success: function (data) {
             $('#loader').css('display', 'none');
             $('#myCarousel').css('display', 'block');
+            $('#ctn_slide').css('display','block');
             var direc = data['directory'];
             var data = data['data'];
             $('#numofkeyframe').text(' ' + data.length + ' KeyFrame');
@@ -148,13 +96,18 @@ function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
-// $("#gallery_frame").delegate("a", "click", function(){
-//     // alert('you clicked me!');
-//     var shot_url = $(this).data('shot');
-//     var frame_url = $(this).data('frame');
-//     alert(shot_url + '    ' + frame_url);
-//     var shot_modal = document.getElementById('shot_modal_xxx');
-//     shot_modal.setAttribute('src',shot_url);
-//     var frame_modal = document.getElementById('frame_modal_xxx');
-//     frame_modal.setAttribute('src',frame_url);
-// });
+$("#gallery_frame").delegate("a", "click", function () {
+    // alert('you clicked me!');
+    var shot_url = $(this).data('shot');
+    var frame_url = $(this).data('frame');
+    var shot_modal = document.getElementById('shot_modal_xxx');
+    // shot_modal.setAttribute('src', '/media/vietnam__result__0/shot/vietnam.mp4');
+    shot_modal.setAttribute('src', shot_url);
+    $('#xxxxx').val(shot_url);
+    var frame_modal = document.getElementById('frame_modal_xxx');
+    frame_modal.setAttribute('src', frame_url);
+});
+$(".modal-wide").on("show.bs.modal", function () {
+    var height = $(window).height() - 200;
+    $(this).find(".modal-body").css("max-height", height);
+});
