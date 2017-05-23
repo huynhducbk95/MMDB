@@ -88,7 +88,6 @@ def dectUsingHSV(inputfile, outputfolder):
     """
     # load image
     cap = cv2.VideoCapture(inputfile)
-
     # create first output folder if not exist
     output_keyframe_path = outputfolder + "/frame/"
     output_keyframe_path2 = outputfolder + "/frame2/"
@@ -108,14 +107,6 @@ def dectUsingHSV(inputfile, outputfolder):
     arr_hist = np.array([[[[]]]], dtype=np.float)
     # Define the codec and create VideoWriter object
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    #img = cv2.imread('../../../data/video/output/anni011/frame88.jpg')
-    #hsv1 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    #hist_new1 = cv2.calcHist \
-    #    ([hsv1], [0, 1, 2], None, [16, 8, 8], [0, 180, 0, 256, 0, 256])
-    #img2 = cv2.imread('../../../data/video/output/anni011/frame89.jpg')
-    #hsv2 = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
-    #hist_new2 = cv2.calcHist \
-    #    ([hsv2], [0, 1, 2], None, [16, 8, 8], [0, 180, 0, 256, 0, 256])
     res = np.array([], dtype=np.float)
     new_frame = []
     old_frame = []
@@ -149,12 +140,18 @@ def dectUsingHSV(inputfile, outputfolder):
     var = np.sqrt(np.var(res))
     mean = np.mean(res)
     # panda -    best
-    T = mean + 0.5 * var
+    frac = var/mean
+    s = 0
+    if frac < 10:
+        s = 0.7
+    else:
+        s = 0.01
+    T = mean + s * var
     print("mean ", mean)
     print("var ", (var))
     print ("T ", T)
-    plt.plot(res, color='r')
-    plt.ylabel('distance')
+    #plt.plot(res, color='r')
+    #plt.ylabel('distance')
     #plt.show()
 
     shotDect = [index for index in range(length) if (res[index] >= T)]
@@ -174,7 +171,7 @@ def dectUsingHSV(inputfile, outputfolder):
     out = cv2.VideoWriter(shot0path, fourcc,e fps, (width, height))"""
     shot0path2 = output_shot_path2 + "shot0.avi"
     out2 = cv2.VideoWriter(shot0path2, fourcc, fps, (width, height))
-    # loop through again video then get key frame and shot
+    # loop through again video then get key fr                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ame and shot
     for i in range(length):
         # Capture frame-by-frameOCN/opencv/video_analysis/shot_detect_RSV_ROG.py:165
         ret, frame = cap.read()
@@ -219,7 +216,7 @@ def dectUsingHSV(inputfile, outputfolder):
         if (i==0):
             keypath2 = output_keyframe_path2 + "frame%d.jpg" % i
             cv2.imwrite(keypath2, gray)
-        if( (index2 < lengthShot) & (i==int(shotDect[index2]) )):
+        if(  (i==int(shotDect[index2]) )):
 
             keypath2 = output_keyframe_path2 + "frame%d.jpg" % i
             cv2.imwrite(keypath2, gray)
@@ -296,7 +293,7 @@ def dectUsingROG(inputfolder):
     # calculating the mean and variance to create thresold
     mean = np.mean(arrDiff)
     var = np.sqrt(np.var(arrDiff))
-    T = mean
+    T = mean + 0.7*var
     print("mean ", mean)
     print("var ", var)
     # this variable to store list keyframe need to be concate because
@@ -334,7 +331,12 @@ def dectUsingROG(inputfolder):
                 if (constrast_before < constrast_current):
                     img_before = img_current
                     index_before = index_current
-                if (i == (lengthShot - 1)): break
+                if (i == (lengthShot - 1)):
+                    keypath1 = inputfolder + "/rog/frame%d.jpg" % index_before
+                    cv2.imwrite \
+                        (keypath1, img_before)
+                    concat_shot(arr_concat, concat_shot_folder + "/shot%d.avi" % concat)
+
             else:
                 # save both image
                 keypath1 = inputfolder + "/rog/frame%d.jpg" % index_before
@@ -360,6 +362,6 @@ def detect_using_HSV_ROG(video_uri, output_folder):
 
 
 if __name__ == '__main__':
-    detect_using_HSV_ROG("../../../data/video/anni001.mpg",
-                         "../../../data/video/output/anni001")
+    detect_using_HSV_ROG("../../../data/video/anni009.mpg",
+                         "../../../data/video/output/anni009")
     #load_and_show_histogram("../../../data/video/output/daddy_and_baby", "hsv")
