@@ -91,10 +91,10 @@ def upload_file(request):
                 str(i): [shot_list[i], frame_list[i]]
             }
             data.append(shot_frame)
-        time.sleep(3)
         len_dic_frame = directory_frame.split('/')
         result = {
             'data': data,
+            # 'directory':'/media/fast8__result__0/rog/',
             'directory': '/'+len_dic_frame[len(len_dic_frame)-4]+'/'+len_dic_frame[len(len_dic_frame)-3]+'/rog',
         }
         return HttpResponse(json.dumps(result), content_type='application/json')
