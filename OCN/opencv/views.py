@@ -58,11 +58,11 @@ def upload_file(request):
 
         def convert_avi_to_mp4(avi_file_path, output):
             os.popen(
-                "avconv -i '{input}' -c:v libx264 -c:a copy '{output}'".format(input=avi_file_path, output = output))
+                "avconv -i '{input}' -c:v libx264 -c:a copy '{output}'".format(input=avi_file_path, output=output))
 
         for file in shot_list:
             path = directory_shot + file
-            output = directory_shot + file.split('.')[0]+'.mp4'
+            output = directory_shot + file.split('.')[0] + '.mp4'
             convert_avi_to_mp4(path, output)
             os.remove(path)
 
@@ -92,9 +92,10 @@ def upload_file(request):
             }
             data.append(shot_frame)
         time.sleep(3)
+        len_dic_frame = directory_frame.split('/')
         result = {
             'data': data,
-            'directory': '/' + directory_frame.split('/')[5] + '/' + directory_frame.split('/')[6] + '/rog',
+            'directory': '/'+len_dic_frame[len(len_dic_frame)-4]+'/'+len_dic_frame[len(len_dic_frame)-3]+'/rog',
         }
         return HttpResponse(json.dumps(result), content_type='application/json')
     return HttpResponse(json.dumps({}), content_type='application/json')
