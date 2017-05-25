@@ -104,6 +104,7 @@ def dectUsingHSV(inputfile, outputfolder):
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    print ("length video ",length)
     arr_hist = np.array([[[[]]]], dtype=np.float)
     # Define the codec and create VideoWriter object
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -142,10 +143,13 @@ def dectUsingHSV(inputfile, outputfolder):
     # panda -    best
     frac = var/mean
     s = 0
+    type = 0
     if frac < 10:
         s = 0.7
+        type = 1
     else:
         s = 0.01
+        type = 2
     T = mean + s * var
     print("mean ", mean)
     print("var ", (var))
@@ -216,7 +220,7 @@ def dectUsingHSV(inputfile, outputfolder):
         if (i==0):
             keypath2 = output_keyframe_path2 + "frame%d.jpg" % i
             cv2.imwrite(keypath2, gray)
-        if(  (i==int(shotDect[index2]) )):
+        if( (index2 < lengthShot) and (i==int(shotDect[index2])) ):
 
             keypath2 = output_keyframe_path2 + "frame%d.jpg" % i
             cv2.imwrite(keypath2, gray)
@@ -226,8 +230,6 @@ def dectUsingHSV(inputfile, outputfolder):
             out2 = cv2.VideoWriter(shotpath, fourcc, fps,
                                   (width, height))
             out2.write(frame)
-            if (index2 >= lengthShot):
-                break
         else:
             out2.write(frame)
 
@@ -240,12 +242,13 @@ def dectUsingHSV(inputfile, outputfolder):
     cap.release()
     out2.release()
     cv2.destroyAllWindows()
+    return type
 
 
 # def function to read ouput from first step using RSV,
 # then continue filtering using ROG
 
-def dectUsingROG(inputfolder):
+def dectUsingROG(inputfolder, type):
     winSize = (64, 64)
     blockSize = (16, 16)
     blockStride = (8, 8)
@@ -293,7 +296,11 @@ def dectUsingROG(inputfolder):
     # calculating the mean and variance to create thresold
     mean = np.mean(arrDiff)
     var = np.sqrt(np.var(arrDiff))
-    T = mean + 0.7*var
+    if type == 1:
+        s = 0.7
+    else:
+        s = 0.7
+    T = mean + s*var
     print("mean ", mean)
     print("var ", var)
     # this variable to store list keyframe need to be concate because
@@ -327,10 +334,9 @@ def dectUsingROG(inputfolder):
                 arr_concat.append(uri)
                 constrast_before = calConstrastColor(img_before)
                 constrast_current = calConstrastColor(img_current)
+                img_before = img_current
+                index_before = index_current
 
-                if (constrast_before < constrast_current):
-                    img_before = img_current
-                    index_before = index_current
                 if (i == (lengthShot - 1)):
                     keypath1 = inputfolder + "/rog/frame%d.jpg" % index_before
                     cv2.imwrite \
@@ -357,11 +363,11 @@ def dectUsingROG(inputfolder):
 
 def detect_using_HSV_ROG(video_uri, output_folder):
     # TODO: analysis
-    dectUsingHSV(video_uri, output_folder)
-    dectUsingROG(output_folder)
+    type = dectUsingHSV(video_uri, output_folder)
+    dectUsingROG(output_folder,type)
 
 
 if __name__ == '__main__':
-    detect_using_HSV_ROG("../../../data/video/anni009.mpg",
-                         "../../../data/video/output/anni009")
+    detect_using_HSV_ROG("../../../data/video/anni002.mpg",
+                         "../../../data/video/output/anni001_2")
     #load_and_show_histogram("../../../data/video/output/daddy_and_baby", "hsv")
