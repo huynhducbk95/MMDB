@@ -47,6 +47,8 @@ def upload_file(request):
         detect_using_HSV_ROG(video_uri=full_path, output_folder=output_folder)
         # get all frame in output folder
         directory_frame = output_folder + '/rog/'
+
+
         frame_list = [f for f in listdir(directory_frame) if isfile(join(directory_frame, f))]
         directory_shot = directory_frame + 'shot/'
         shot_list = [f for f in listdir(directory_shot) if isfile(join(directory_shot, f))]
@@ -94,7 +96,6 @@ def upload_file(request):
         len_dic_frame = directory_frame.split('/')
         result = {
             'data': data,
-            # 'directory':'/media/fast8__result__0/rog/',
             'directory': '/'+len_dic_frame[len(len_dic_frame)-4]+'/'+len_dic_frame[len(len_dic_frame)-3]+'/rog',
         }
         return HttpResponse(json.dumps(result), content_type='application/json')

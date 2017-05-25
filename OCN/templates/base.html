@@ -118,24 +118,11 @@
         <div class="row">
             <div class="col-lg-12">
                 <h2 class="page-header" style="margin-top: 20px">KeyFrame Gallery:<span
-                        id="numofkeyframe"></span>
+                        id="numofkeyframe" data-url="{% url 'upload_file' %}"></span>
                 </h2>
             </div>
             <div id="loader" style="display: none"></div>
-            <div class="    carousel slide" id="myCarousel" data-url="{% url 'upload_file' %}">
-                <div class="carousel-inner" id="gallery_frame" style="height: 350px">
-                </div>
-                <nav style="display: none" id="ctn_slide">
-                    <ul class="control-box pager">
-                        <li><a data-slide="prev" href="#myCarousel" class=""><i
-                                class="glyphicon glyphicon-chevron-left"></i></a></li>
-                        <li><a data-slide="next" href="#myCarousel" class=""><i
-                                class="glyphicon glyphicon-chevron-right"></i></a></li>
-                    </ul>
-                </nav>
-                <!-- /.control-box -->
-
-            </div><!-- /#myCarousel -->
+            <div id="slide_result"></div>
             <!-- Trigger the modal with a button -->
 
             <!-- Modal -->
