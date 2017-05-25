@@ -1,3 +1,1 @@
-# MMDB
-
-Video Analysis
+# Multimedia Database
