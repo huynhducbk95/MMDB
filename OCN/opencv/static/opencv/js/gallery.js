@@ -1,11 +1,11 @@
 /**
  * Created by huynhduc on 17/05/2017.
  */
-$(document).ready(function() {
-    $('.carousel').carousel({
-      interval: 6000
-    })
-  });
+// $(document).ready(function() {
+//     $('.carousel').carousel({
+//       interval: 6000
+//     })
+//   });
 
 $('#btn_upload_video').change(function (event) {
     var filename = $('input[type=file]').val().split('\\').pop();
@@ -26,7 +26,7 @@ $('#btn_upload_video').change(function (event) {
     }
 });
 $("form#form_upload_file").submit(function () {
-    var url = 'http://localhost:8000' + $('#myCarousel').data('url');
+    var url = 'http://localhost:8000' + $('#numofkeyframe').data('url');
     var token = $('input[name="csrfmiddlewaretoken"]').val();
     var formData = new FormData($(this)[0]);
     $('#gallery_frame').empty();
@@ -46,13 +46,44 @@ $("form#form_upload_file").submit(function () {
         async: true,
         success: function (data) {
             $('#loader').css('display', 'none');
-            $('#myCarousel').css('display', 'block');
-            $('#ctn_slide').css('display','block');
             $('#fh5co-home').css('display','block');
             var direc = data['directory'];
             var data = data['data'];
             $('#numofkeyframe').text(' ' + data.length + ' KeyFrame');
             var count = 0;
+            var carousel = document.createElement('div');
+            $(carousel).addClass('carousel slide');
+            $(carousel).attr('id','myCarousel');
+            var carousel_inner = document.createElement('div');
+            $(carousel_inner).addClass('carousel-inner');
+            $(carousel_inner).css('height','350');
+            $(carousel_inner).attr('id','gallery_frame');
+            carousel.appendChild(carousel_inner);
+            var nav = document.createElement('nav');
+            $(nav).attr('id','ctn_slide');
+            var ul = document.createElement('ul');
+            $(ul).addClass('control-box pager');
+            var li_1 = document.createElement('li');
+            var a_1 = document.createElement('a');
+            a_1.setAttribute('data-slide','prev');
+            a_1.setAttribute('href','#myCarousel');
+            var i_1 = document.createElement('i');
+            $(i_1).addClass("glyphicon glyphicon-chevron-left");
+            a_1.appendChild(i_1);
+            li_1.appendChild(a_1);
+            ul.appendChild(li_1);
+
+            var li_2 = document.createElement('li');
+            var a_2 = document.createElement('a');
+            a_2.setAttribute('data-slide','next');
+            a_2.setAttribute('href','#myCarousel');
+            var i_2 = document.createElement('i');
+            $(i_2).addClass("glyphicon glyphicon-chevron-right");
+            a_2.appendChild(i_2);
+            li_2.appendChild(a_2);
+            ul.appendChild(li_2);
+            nav.appendChild(ul);
+            carousel.appendChild(nav);
             var i = 0;
             while (i < data.length) {
                 main_div = document.createElement('div');
@@ -82,11 +113,15 @@ $("form#form_upload_file").submit(function () {
                     main_div.appendChild(div);
                     j += 1;
                 }
-                div_gallery = document.getElementById('gallery_frame');
-                div_gallery.appendChild(main_div);
+                carousel_inner.appendChild(main_div);
                 i += 18;
                 count += 1;
             }
+            var result = document.getElementById('slide_result');
+            result.appendChild(carousel);
+            $(carousel).carousel({
+                interval: 6000
+            })
         },
         cache: false,
         contentType: false,
@@ -99,7 +134,7 @@ function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
-$("#gallery_frame").delegate("a", "click", function () {
+$("#slide_result").delegate("a", "click", function () {
     // alert('you clicked me!');
     var shot_url = $(this).data('shot');
     var frame_url = $(this).data('frame');

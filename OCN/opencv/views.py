@@ -47,6 +47,8 @@ def upload_file(request):
         detect_using_HSV_ROG(video_uri=full_path, output_folder=output_folder)
         # get all frame in output folder
         directory_frame = output_folder + '/rog/'
+
+
         frame_list = [f for f in listdir(directory_frame) if isfile(join(directory_frame, f))]
         directory_shot = directory_frame + 'shot/'
         shot_list = [f for f in listdir(directory_shot) if isfile(join(directory_shot, f))]
@@ -91,7 +93,6 @@ def upload_file(request):
                 str(i): [shot_list[i], frame_list[i]]
             }
             data.append(shot_frame)
-        time.sleep(3)
         len_dic_frame = directory_frame.split('/')
         result = {
             'data': data,
